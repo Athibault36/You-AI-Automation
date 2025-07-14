@@ -1,0 +1,15 @@
+name: You-AI Full Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+  scaffold-folders:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run PowerShell Setup
+        run: ./Initialize-YouAI.ps1
+        shell: pwsh
