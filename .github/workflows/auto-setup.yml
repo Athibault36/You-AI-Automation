@@ -1,18 +1,24 @@
-name: Auto Scaffold You-AI
-
-on:
-  workflow_dispatch:        # Allows manual triggering
-  schedule:
-    - cron: '0 4 * * *'     # Runs daily at 4 AM UTC
-
-jobs:
-  scaffold-project:
-    runs-on: windows-latest
-
+  upload-video:
+    runs-on: ubuntu-latest
+    needs: generate-script
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Run PowerShell setup
-        run: ./Initialize-YouAI.ps1
-        shell: pwsh
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install @googleapis/youtube
+
+      - name: Upload to YouTube
+        run: |
+          echo "${{ secrets.CLIENT_SECRET_JSON }}" > client_secret.json
+          node 10_AutomationScripts/upload_to_youtube.js \
+            "05_FinalVideos/video_001.mp4" \
+            "Top 5 AI Tools That Save You Time" \
+            "Here are 5 AI tools to save you hours each week." \
+            "AI,tools,productivity,time-saving"
+        env:
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
