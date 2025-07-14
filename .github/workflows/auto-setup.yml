@@ -1,3 +1,30 @@
+name: You-AI Full Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+  scaffold:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Scaffold folder structure
+        run: ./Initialize-YouAI.ps1
+        shell: pwsh
+
+  generate-script:
+    runs-on: windows-latest
+    needs: scaffold
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate video script
+        run: ./10_AutomationScripts/GenerateScript.ps1 -Topic "Top 5 AI Tools That Save You Time" -OutputFile "01_Scripts/video_001.txt"
+        shell: pwsh
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
   upload-video:
     runs-on: ubuntu-latest
     needs: generate-script
@@ -7,18 +34,21 @@
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '16'
 
-      - name: Install dependencies
+      - name: Write client_secret.json
+        run: echo "${{ secrets.CLIENT_SECRET_JSON }}" > client_secret.json
+
+      - name: Install YouTube API client
         run: npm install @googleapis/youtube
 
-      - name: Upload to YouTube
+      - name: Upload final video
         run: |
-          echo "${{ secrets.CLIENT_SECRET_JSON }}" > client_secret.json
           node 10_AutomationScripts/upload_to_youtube.js \
             "05_FinalVideos/video_001.mp4" \
             "Top 5 AI Tools That Save You Time" \
-            "Here are 5 AI tools to save you hours each week." \
+            "Here are five AI tools to skyrocket your productivity." \
             "AI,tools,productivity,time-saving"
         env:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
