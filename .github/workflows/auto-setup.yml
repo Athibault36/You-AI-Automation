@@ -1,0 +1,18 @@
+name: Auto Scaffold You-AI
+
+on:
+  workflow_dispatch:        # Allows manual triggering
+  schedule:
+    - cron: '0 4 * * *'     # Runs daily at 4 AM UTC
+
+jobs:
+  scaffold-project:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Run PowerShell setup
+        run: ./Initialize-YouAI.ps1
+        shell: pwsh
