@@ -13,9 +13,10 @@ jobs:
       - name: Run PowerShell Setup
         run: ./Initialize-YouAI.ps1
         shell: pwsh
-jobs:
+
   generate-scripts:
     runs-on: windows-latest
+    needs: scaffold-folders
     steps:
       - name: Generate Multiple Scripts
         run: ./10_AutomationScripts/GenerateScriptsBatch.ps1
